@@ -1,8 +1,11 @@
 from flask import Flask, abort, request, jsonify
+from flask_cors import CORS, cross_origin
 from pymongo import MongoClient
 import datetime
 
 app = Flask(__name__)
+app.debug = True
+CORS(app)
 
 API_KEY = "test api key"
 MONGO_HOST = "mongo"
@@ -17,18 +20,21 @@ class MongoDBRepository:
         return [x for x in self.db.door_opened.find({}, {"_id": 0})]
 
     def createDoorEvent(self):
-        self.db.door_opened.insert_one({"ocurredOn": str(datetime.datetime.now())})
+        self.db.door_opened.insert_one({"ocurredOn": datetime.datetime.now()})
         return True
 
     def findAllLetterEvents(self):
         return [x for x in self.db.letter_introduced.find({}, {"_id": 0})]
 
     def createLetterEvent(self):
-        self.db.letter_introduced.insert_one({"ocurredOn": str(datetime.datetime.now())})
+        self.db.letter_introduced.insert_one({"ocurredOn": datetime.datetime.now()})
         return True
     
     def isInboxEmpty(self):
         letter = self.db.door_opened.find_one({}, {"_id": 0})
+        door = self.db.door_opened.find_one({}, {"_id": 0})
+        if letter.ocurredOn > door.ocurredOn:
+            return False
         return True
 
 
@@ -66,8 +72,9 @@ def temperature_entry():
     check_api_key()
     return "New temperature measure registered successfully"
 
-
-if __name__ == "__main__":
-       app.run(host='0.0.0.0', debug=True, port=8000)
+@app.route("/empty", methods=['GET'])
+def empty():
+    check_api_key()
+    return jsonify({"empty": True})
 
 
