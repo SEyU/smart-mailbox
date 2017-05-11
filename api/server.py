@@ -5,7 +5,7 @@ import datetime
 app = Flask(__name__)
 
 API_KEY = "test api key"
-MONGO_HOST = "localhost"
+MONGO_HOST = "mongo"
 MONGO_PORT = 27017
 
 class MongoDBRepository:
@@ -28,7 +28,7 @@ class MongoDBRepository:
         return True
     
     def isInboxEmpty(self):
-        letter = self.db.door_opened.find_one({}, {"_id": 0})]
+        letter = self.db.door_opened.find_one({}, {"_id": 0})
         return True
 
 
