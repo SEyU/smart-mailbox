@@ -1,30 +1,32 @@
 app.service('MainService', ['$http', function ($http) {
 
-var urlBase = 'http://apifrasco.manelme.com/';
+var urlBase = 'http://localhost:8000';
 
     this.getCorreo = function () {
 
-        return $http.get(urlBase+'/correo', {
+        return $http.get(urlBase+'/letter', {
 
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                
+                'X-Api-Key':'test api key',
             }
         });
     };
     
     this.getRecogidas = function () {
 
-        return $http.get(urlBase+'/recogidas', {
+        return $http.get(urlBase+'/door', {
 
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                
+                'X-Api-Key':'test api key',
             }
         });
     };
 
     this.getTemp = function (id) {
 
-        return $http.get(urlBase + '/temp', {
+        return $http.get(urlBase + '/measures', {
 
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

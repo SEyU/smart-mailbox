@@ -10,67 +10,70 @@
     var recogidas;
     var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
         "Augosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    var temeraturas;
-    $scope.dineroEnCaja = 0;
+    var temperaturas;  
 
-    $scope.ejemploGrafica = function () {
-        google.charts.load("current", { packages: ["calendar"] });
+
+    var graficaTemperaturas = function () {
         google.charts.setOnLoadCallback(drawChart);
 
-        function drawChart() {
-            var dataTable = new google.visualization.DataTable();
-            dataTable.addColumn({ type: 'date', id: 'Date' });
-            dataTable.addColumn({ type: 'number', id: 'Won/Loss' });
-            dataTable.addRows([
-                [new Date(2012, 3, 13), 37032],
-                [new Date(2012, 3, 14), 38024],
-                [new Date(2012, 3, 15), 38024],
-                [new Date(2012, 3, 16), 38108],
-                [new Date(2012, 3, 17), 38229],
-                // Many rows omitted for brevity.
-                [new Date(2013, 9, 4), 38177],
-                [new Date(2013, 9, 5), 38705],
-                [new Date(2013, 9, 12), 38210],
-                [new Date(2013, 9, 13), 38029],
-                [new Date(2013, 9, 19), 38823],
-                [new Date(2013, 9, 23), 38345],
-                [new Date(2013, 9, 24), 38436],
-                [new Date(2013, 9, 30), 38447]
-            ]);
+      function drawChart() {
 
-            var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+        var data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['Memory', 80],
+          ['CPU', 55],
+          ['Network', 68]
+        ]);
 
-            var options = {
-                title: "Red Sox Attendance",
-                height: 350,
-            };
+        var options = {
+          width: 400, height: 120,
+          redFrom: 90, redTo: 100,
+          yellowFrom:75, yellowTo: 90,
+          minorTicks: 5
+        };
 
-            chart.draw(dataTable, options);
-        }
-    };
+        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
 
-    $scope.myChartObject = {};
-    $scope.myChartObject.type = "Gauge";
+        chart.draw(data, options);
 
-    $scope.myChartObject.options = {
-        redFrom: 90,
-        redTo: 100,
-        yellowFrom: 75,
-        yellowTo: 90,
-        minorTicks: 5
-    };
-
-    $scope.myChartObject.data = [
-        ['Label', 'Value'],
-        ['Temperatura', 80],
-        ['Humedad', 55]
-    ];
-    var graficaTemperaturas = function () {
-
+        setInterval(function() {
+          data.setValue(0, 1, 40 + Math.round(60 * Math.random()));
+          chart.draw(data, options);
+        }, 13000);
+        setInterval(function() {
+          data.setValue(1, 1, 40 + Math.round(60 * Math.random()));
+          chart.draw(data, options);
+        }, 5000);
+        setInterval(function() {
+          data.setValue(2, 1, 60 + Math.round(20 * Math.random()));
+          chart.draw(data, options);
+        }, 26000);
+      }
     };
 
     var graficaCorreos = function () {
+        google.charts.load("current", { packages: ["calendar","gauge"] });
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn({ type: 'date', id: 'Date' });
+        dataTable.addColumn({ type: 'number', id: 'Won/Loss' });
+        dataTable.addRows([
+            [new Date(2012, 3, 13), 10],
+            [new Date(2012, 3, 14), 1],
+            [new Date(2012, 3, 15), 3],
+            [new Date(2012, 3, 16), 5],
+            [new Date(2012, 3, 17), 7],
+        ]);
 
+        var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+
+        var options = {
+            title: "Red Sox Attendance",
+        };
+
+        chart.draw(dataTable, options);
+    }
     };
 
     var graficaRecogidas = function () {
@@ -79,19 +82,16 @@
 
     $scope.cargarResumen = function () {
 
-        MainService.getCorreo.then(function (response) {
+
+        MainService.getCorreo().then(function (response) {
 
             correos = response.data;
-
-            //graficaCorreos();
+            graficaCorreos();
 
             MainService.getRecogidas().then(function (response) {
 
-                temeraturas = response.data;
-
-                //graficaTemperaturas();
-
-                $scope.barraDeCarga = false;
+                recogidas= response.data;
+                graficaRecogidas();
 
             }, function (error) {
 
@@ -101,8 +101,8 @@
 
             MainService.getRecogidas().then(function (response) {
 
-                recogidas = response.data;
-
+                temperaturas = response.data;
+                graficaTemperaturas();
 
             }, function (error) {
 
