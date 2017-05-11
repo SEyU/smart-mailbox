@@ -1,10 +1,15 @@
 # smart-mailbox
 
-API endpoints
+How to start the project
 
-GET  /letter 
-GET  /letter/last
-POST /letter
-GET  /door
-GET  /door/last
-POST /door
+```
+git clone <this-repo>
+cd <this-repo>
+docker-compose up -d
+````
+
+If there are changes
+```
+docker-compose build
+docker-compose stop && docker-compose up -d
+```

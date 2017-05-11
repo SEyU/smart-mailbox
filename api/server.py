@@ -1,6 +1,7 @@
 from flask import Flask, abort, request, jsonify
 from flask_cors import CORS, cross_origin
 from pymongo import MongoClient
+import pymongo
 import datetime
 
 app = Flask(__name__)
@@ -16,29 +17,33 @@ class MongoDBRepository:
     def __init__(self):
         self.db = MongoClient(MONGO_HOST, MONGO_PORT).sello
 
+    def findAllMeasures(self):
+        return [x for x in self.db.measures.find({}, {"_id": 0}).sort("ocurredOn", pymongo.DESCENDING)]
+
+    def createMeasures(self, temp, hum):
+        self.db.measures.insert_one({"temp": temp, "hum": hum, "ocurredOn": datetime.datetime.now()})
+        return True
+
     def findAllDoorEvents(self):
-        return [x for x in self.db.door_opened.find({}, {"_id": 0})]
+        return [x for x in self.db.door_opened.find({}, {"_id": 0}).sort("ocurredOn", pymongo.DESCENDING)]
 
     def createDoorEvent(self):
         self.db.door_opened.insert_one({"ocurredOn": datetime.datetime.now()})
         return True
 
     def findAllLetterEvents(self):
-        return [x for x in self.db.letter_introduced.find({}, {"_id": 0})]
+        return [x for x in self.db.letter_introduced.find({}, {"_id": 0}).sort("ocurredOn", pymongo.DESCENDING)]
 
     def createLetterEvent(self):
         self.db.letter_introduced.insert_one({"ocurredOn": datetime.datetime.now()})
         return True
     
     def isInboxEmpty(self):
-        letter = self.db.door_opened.find_one({}, {"_id": 0})
-        door = self.db.door_opened.find_one({}, {"_id": 0})
-        if letter.ocurredOn > door.ocurredOn:
+        letter = [x for x in self.db.letter_introduced.find({}, {"_id": 0}).sort("ocurredOn", pymongo.DESCENDING).limit(1)][0]
+        door = [x for x in self.db.door_opened.find({}, {"_id": 0}).sort("ocurredOn", pymongo.DESCENDING).limit(1)][0]
+        if letter['ocurredOn'] > door['ocurredOn']:
             return False
         return True
-
-
-
 
 def check_api_key():
     if request.headers.get('X-Api-Key') != API_KEY:
@@ -67,14 +72,24 @@ def open_door():
 
     return "DOOR_OPENED_EVENT registered successfully"
 
-@app.route("/temp", methods=['POST'])
-def temperature_entry():
+@app.route("/measures", methods=['POST', 'GET'])
+def measures():
     check_api_key()
+    mongo_repo = MongoDBRepository()
+
+    if request.method == 'GET':
+        return jsonify(mongo_repo.findAllMeasures())
+
+    temp = request.values['temp']
+    hum = request.values['hum']
+    
+    mongo_repo.createMeasures(temp, hum)
     return "New temperature measure registered successfully"
 
 @app.route("/empty", methods=['GET'])
 def empty():
     check_api_key()
-    return jsonify({"empty": True})
+    mongo_repo = MongoDBRepository()
+    return jsonify({"empty": mongo_repo.isInboxEmpty()})
 
 
