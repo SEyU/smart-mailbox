@@ -71,9 +71,10 @@
         google.charts.setOnLoadCallback(drawChart);
         function drawChart() {
             var dataTable = new google.visualization.DataTable();
-            var correosData = {};
+            var correosData = [];
             dataTable.addColumn({ type: 'date', id: 'Date' });
             dataTable.addColumn({ type: 'number', id: 'Won/Loss' });
+            var numero = 0;
             var auxNum=0;
             var auxDate = new Date(correos[0].ocurredOn);
             for(var i=0;i<correos.length;i++){
@@ -81,30 +82,29 @@
                 if(auxDate2.toDateString()==auxDate.toDateString()){
                     auxNum = auxNum+1;
                 }else{
-                    correosData[auxDate] = auxNum;
+                    correosData[numero] = [auxDate, auxNum];
+                    numero++;
                     auxDate = new Date(correos[i].ocurredOn);
                     auxNum = 1;
                 }
             }
-            correosData[auxDate] = auxNum;
-            window.alert(correosData[auxDate]);
-            dataTable.addRows([
-                [new Date(2012, 3, 13), 10],
-                [new Date(2012, 3, 14), 1],
-                [new Date(2012, 3, 15), 3],
-                [new Date(2012, 3, 16), 5],
-                [new Date(2012, 3, 17), 7],
-            ]);
+
+            correosData[numero] = [auxDate,auxNum];
+            dataTable.addRows(
+                correosData
+            );
 
             var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
 
             var options = {
-                title: "Red Sox Attendance",
+                title: "Correos Recibidos",
                 calendar: {
                     yearLabel: {
-                        color: 'white',
-                    }
+                        color: 'grey',
+                    },
+                    cellSize: 14,
                 },
+                
 
             };
 
