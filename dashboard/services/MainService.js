@@ -24,13 +24,24 @@ var urlBase = 'http://localhost:8000';
         });
     };
 
-    this.getTemp = function (id) {
+    this.getTemp = function () {
 
         return $http.get(urlBase + '/measures', {
 
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Api-Key':'test api key',
             }
         });
     };
+
+    this.getStatus = function () {
+
+        return $http.get(urlBase + '/empty', {
+
+            headers: {
+                'X-Api-Key':'test api key',
+            }
+        });
+    };
+
 }]);
