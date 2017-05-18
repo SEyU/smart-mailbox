@@ -14,6 +14,5 @@ docker-compose build
 docker-compose stop && docker-compose up -d
 ```
 Scheme
-```
+
 ![Screenshot](Smart-mailbox.png)
-```
