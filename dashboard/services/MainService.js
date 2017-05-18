@@ -34,9 +34,18 @@ var urlBase = 'http://localhost:8000';
         });
     };
 
+    this.getTempNow = function () {
+
+        return $http.get(urlBase + '/measures?limit=1', {
+
+            headers: {
+                'X-Api-Key':'test api key',
+            }
+        });
+    };
     this.getStatus = function () {
 
-        return $http.get(urlBase + '/empty', {
+        return $http.get(urlBase + '/mailbox', {
 
             headers: {
                 'X-Api-Key':'test api key',

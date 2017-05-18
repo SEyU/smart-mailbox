@@ -3,12 +3,23 @@
     $('.dropdown-toggle').dropdown();
     
     $scope.time = new Date().toLocaleTimeString();
-    $scope.estado = true
+    $scope.estado = 0;
     var hoy = $interval(function(){
        $scope.time = new Date().toLocaleTimeString();
        MainService.getStatus().then(function (response) {
 
-            $scope.estado = response.data.empty;
+            $scope.estado = response.data.count;
+
+
+        }, function (error) {
+
+            window.alert(error.message);
+        });
+        MainService.getTempNow().then(function (response2) {
+
+            $scope.tempNow = response2.data[0].temp;
+            $scope.humNow = response2.data[0].hum;
+
 
         }, function (error) {
 
@@ -20,54 +31,97 @@
     var correos;
     var recogidas;
     var temperaturas;
+    var temperaturaNow;
     var status;
     var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
         "Augosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     
-    $scope.barraDeCarga = true;
 
 
     var graficaTemperaturas = function () {
-        google.charts.setOnLoadCallback(drawChart);
 
-        function drawChart() {
+      google.charts.setOnLoadCallback(drawChart);
 
-            var data = google.visualization.arrayToDataTable([
-                ['Label', 'Value'],
-                ['Memory', 80],
-                ['CPU', 55],
-                ['Network', 68]
-            ]);
+      function drawChart() {
 
-            var options = {
-                width: 400, height: 120,
-                redFrom: 90, redTo: 100,
-                yellowFrom: 75, yellowTo: 90,
-                minorTicks: 5
-            };
+        var tempData = [];
+        var auxNum=-1;
+        
+        for(var i=0;i<temperaturas.length;i++){
+            var auxDate = new Date(temperaturas[i].ocurredOn);
+            
+            if(auxDate.getMonth() == new Date().getMonth() && auxDate.getFullYear() == new Date().getFullYear()){
+                if(tempData.length == 0){
+                    tempData[tempData.length] = {"dia": auxDate.getDate(), "tempMax":temperaturas[i].temp, "tempMin":temperaturas[i].temp,"humMax":temperaturas[i].hum};
+                } 
+                
+                tempData.forEach(function(element) {
+                    if(element.dia == auxDate.getDate()){
+                        auxNum = element.dia;
+                        if(element.tempMax < temperaturas[i].temp){
+                            element.tempMax = temperaturas[i].temp;
+                        }
+                        if(element.tempMin > temperaturas[i].temp){
+                            element.tempMin = temperaturas[i].temp;
+                        }
+                        if(element.humMax < temperaturas[i].hum){
+                            element.humMax = temperaturas[i].hum;
+                        }
+                    }
 
-            var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-
-            chart.draw(data, options);
-
-            setInterval(function () {
-                data.setValue(0, 1, 40 + Math.round(60 * Math.random()));
-                chart.draw(data, options);
-            }, 13000);
-            setInterval(function () {
-                data.setValue(1, 1, 40 + Math.round(60 * Math.random()));
-                chart.draw(data, options);
-            }, 5000);
-            setInterval(function () {
-                data.setValue(2, 1, 60 + Math.round(20 * Math.random()));
-                chart.draw(data, options);
-            }, 26000);
+                }, this);
+                if(auxNum == -1){
+                    tempData[tempData.length] = {"dia": auxDate.getDate(), "tempMax":temperaturas[i].temp, "tempMin":temperaturas[i].temp,"humMax":temperaturas[i].hum};
+                }else{
+                    auxNum = -1;
+                }
+                
+            }
         }
+        tempData = tempData.reverse();
+        
+        var datos = [['Dia', 'Temp. Max', 'Temp. Min']];
+        var datos2 = [['Dia', 'Hum. Max']];
+        
+
+          
+        tempData.forEach(function(element) {
+
+            datos.push([Number(element.dia), Number(element.tempMax), Number(element.tempMin)]);        
+            datos2.push([Number(element.dia), Number(element.humMax)]);
+        }, this);
+
+        
+        var data = google.visualization.arrayToDataTable(datos);
+        var data2 = google.visualization.arrayToDataTable(datos2);
+
+
+        var options = {
+          title: 'Temperatura de '+ monthNames[new Date().getMonth()],
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          backgroundColor: { fill:'transparent' }
+        };
+
+        var options2 = {
+          title: 'Humedad de '+ monthNames[new Date().getMonth()],
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          backgroundColor: { fill:'transparent' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        var chart2 = new google.visualization.LineChart(document.getElementById('curve_chart2'));
+
+        chart.draw(data, options);
+        chart2.draw(data2, options2);
+      }
+         
     };
 
     var graficaCorreos = function () {
-        google.charts.load("current", { packages: ["calendar", "gauge"] });
+        google.charts.load("current", { packages: ["calendar", "gauge","corechart"] });
         google.charts.setOnLoadCallback(drawChart);
         function drawChart() {
             var dataTable = new google.visualization.DataTable();
@@ -118,9 +172,19 @@
 
     $scope.cargarResumen = function () {
         
+        MainService.getTempNow().then(function (response2) {
+
+            $scope.tempNow = response2.data[0].temp;
+            $scope.humNow = response2.data[0].hum;
+
+
+        }, function (error) {
+
+            window.alert(error.message);
+        });
         MainService.getStatus().then(function (response) {
 
-            $scope.estado = response.data.empty;
+            $scope.estado = response.data.count;
 
         }, function (error) {
 
