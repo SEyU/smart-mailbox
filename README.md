@@ -15,4 +15,4 @@ docker-compose stop && docker-compose up -d
 ```
 Schema
 
-![Screenshot](Smart-mailbox.png)
+![Screenshot](Smart-mailbox2.png)
