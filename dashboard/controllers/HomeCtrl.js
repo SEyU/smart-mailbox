@@ -13,7 +13,7 @@
 
         }, function (error) {
 
-            
+            window.alert(error.message);
         });
         MainService.getTempNow().then(function (response2) {
 
@@ -23,7 +23,7 @@
 
         }, function (error) {
 
-            
+            window.alert(error.message);
         });
         
     },1000);
@@ -170,30 +170,15 @@
 
     };
 
-    $scope.reload = function (){
-
-        window.location.reload();
-    };
-
     $scope.cargarResumen = function () {
         
-        MainService.getTempNow().then(function (response2) {
-
-            $scope.tempNow = response2.data[0].temp;
-            $scope.humNow = response2.data[0].hum;
-
-
-        }, function (error) {
-
-            
-        });
         MainService.getStatus().then(function (response) {
 
             $scope.estado = response.data.count;
 
         }, function (error) {
 
-            
+            window.alert(error.message);
         });
         MainService.getCorreo().then(function (response) {
 
@@ -207,7 +192,7 @@
 
             }, function (error) {
 
-                
+                window.alert(error.message);
 
             });
 
@@ -218,12 +203,12 @@
 
             }, function (error) {
 
-                
+                window.alert(error.message)
             });
 
         }, function (error) {
 
-            
+            window.alert(error.message);
         });
     }
 }]);
