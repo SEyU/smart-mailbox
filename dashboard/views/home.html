@@ -15,7 +15,7 @@
                 <div class="col s4">
                     <div class="card-panel grey lighten-3 ">
                         <ul class="collection">
-                            <li class="collection-item avatar">
+                            <li class="collection-item avatar transparent">
                                 <img src="img/tempicon.png" alt="" class="circle">
                                 <span class="title">Temperatura</span>
                                 <p>{{tempNow}}ºC
@@ -27,8 +27,8 @@
                 <div class="col s4">
                     <div class="card-panel grey lighten-3">
                         <ul class="collection" ng-if="estado!=0">
-                            <li class="collection-item avatar">
-                                <i class="material-icons circle green">mail</i>
+                            <li class="collection-item avatar transparent">
+                                <i class="material-icons circle cyan">mail</i>
                                 <span class="title">Tiene correo</span>
                                 <p>Cantidad: {{estado}}
                                 </p>
@@ -36,17 +36,18 @@
                         </ul>
 
                         <ul class="collection" ng-if="estado==0">
-                            <li class="collection-item avatar">
-                                <i class="material-icons circle">mail</i>
+                            <li class="collection-item avatar transparent">
+                                <i class="material-icons circle grey darken-3">mail</i>
                                 <span class="title">No tiene correo</span>
+                                <p>-____-</p>
                             </li>
                         </ul>
                     </div>
                 </div>
                 <div class="col s4">
-                    <div class="card-panel grey lighten-3 ">
+                    <div class="card-panel grey lighten-3">
                         <ul class="collection">
-                            <li class="collection-item avatar">
+                            <li class="collection-item avatar transparent">
                                 <img src="img/humidityicon.png" alt="" class="circle">
                                 <span class="title">Humedad</span>
                                 <p>{{humNow}}%
@@ -77,7 +78,7 @@
             </div>
         </div>
         <div class="fixed-action-btn">
-            <a class="right btn btn-floating cyan pulse"><i class="material-icons">autorenew</i></a>
+            <a class="right btn btn-floating cyan pulse" ng-click="reload()"><i class="material-icons">autorenew</i></a>
         </div>
     </div>
 
