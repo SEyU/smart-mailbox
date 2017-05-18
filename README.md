@@ -13,6 +13,6 @@ If there are changes
 docker-compose build
 docker-compose stop && docker-compose up -d
 ```
-Scheme
+Schema
 
 ![Screenshot](Smart-mailbox.png)
