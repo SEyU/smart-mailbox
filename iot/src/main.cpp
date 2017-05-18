@@ -5,7 +5,8 @@
 #include <NTPClient.h>
 #include <SSD1306.h>
 #include <DHT.h>
-
+#include <ESPAsyncTCP.h>
+#include <SyncClient.h>
 #include "fonts.h"
 #include "config.h"
 
@@ -27,6 +28,8 @@ int dhtMillis = 0;
 float temperature = 0;
 float humidity = 0;
 int ldrLast = 0;
+int ldrCount = 0;
+int ldrValue = 0;
 int mailCount = 0;
 
 SSD1306 display(0x3c, D3, D4);
@@ -62,6 +65,33 @@ void setup() {
   Serial.begin(9600);
 }
 
+void notify(String path) {
+  unsigned long startMillis = millis();
+  SyncClient client;
+  if(!client.connect("mailbox.clanlr.net", 8000)){
+    Serial.println("Connection failed.");
+    return;
+  }
+  client.setTimeout(2);
+  if(client.printf("POST /%s HTTP/1.1\r\nHost: mailbox.clanlr.net\r\n \
+                    X-Api-Key: test api key\r\n\r\n", path.c_str()) > 0){
+    while(client.connected() && client.available() == 0){
+      delay(1);
+    }
+//    while(client.available()){
+//      Serial.write(client.read());
+//    }
+    if(client.connected()){
+      client.stop();
+    }
+    Serial.printf("POST /%s OK. Time = %u ms.\n", path.c_str(), millis() - startMillis);
+  } else {
+    client.stop();
+    Serial.println("Send failed.");
+    while(client.connected()) delay(1);
+  }
+}
+
 void loop() {
   unsigned long currentMillis = millis();
 
@@ -74,20 +104,26 @@ void loop() {
       mailCount = 0;
     } else if (digitalRead(topPin)) {
       digitalWrite(ledPin, HIGH);
-      delay(200);
-      int ldrValue = analogRead(ldrPin);
       if (ldrLast == 0) {
-        ldrLast = ldrValue;
-        Serial.print("Initial value = ");
-        Serial.println(abs(ldrLast));
+        delay(200);
+        ldrLast = analogRead(ldrPin);
+        ldrCount = 0;
+        ldrValue = 0;
+        Serial.printf("LDR initial value = %d\n", ldrLast);
       } else {
-        int ldrDiff = ldrLast - ldrValue;
-        if (abs(ldrDiff) > ldrThreshold) {
-          mailCount += 1;
-          delay(500);
-          Serial.print("New mail! Diff = ");
-          Serial.println(abs(ldrDiff));
-          ldrLast = analogRead(ldrPin);
+        ldrValue += analogRead(ldrPin);
+        ldrCount += 1;
+        if (ldrCount == 5) {
+          int ldrDiff = (ldrValue/5) - ldrLast;
+          Serial.printf("DEBUG Diff = %d\n", ldrDiff);
+          if (abs(ldrDiff) > ldrThreshold) {
+            mailCount += 1;
+            Serial.printf("New mail! Diff = %d\n", ldrDiff);
+            notify("letter");
+            ldrLast = analogRead(ldrPin);
+          }
+          ldrCount = 0;
+          ldrValue = 0;
         }
       }
     } else {
@@ -120,5 +156,7 @@ void loop() {
       humidity = h;
       temperature = t;
     }
+    String path;
+    notify(String("measures?temp="+ String(temperature, 1) + "&hum=" + String(humidity, 1)));
   }
 }
