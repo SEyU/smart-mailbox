@@ -170,6 +170,10 @@
 
     };
 
+    $scope.reload = function(){
+        window.location.reload();
+    };
+
     $scope.cargarResumen = function () {
         
         MainService.getStatus().then(function (response) {
