@@ -19,11 +19,13 @@ const int doorPin = D1;
 const int ledInterval = 100;
 const int screenInterval = 1000;
 const int dhtInterval = 60000;
+const int doorInterval = 1000;
 const int ldrThreshold = 100;
 
 int ledMillis = 0;
 int screenMillis = 0;
 int dhtMillis = 0;
+int doorMillis = 0;
 
 float temperature = 0;
 float humidity = 0;
@@ -80,10 +82,10 @@ void notify(String path) {
     while(client.connected() && client.available() == 0){
       delay(1);
     }
-    while(client.available()){
-      Serial.write(client.read());
-    }
-    Serial.println("");
+//    While(client.available()){
+//      Serial.write(client.read());
+//    }
+//    Serial.println("");
     if(client.connected()){
       client.stop();
     }
@@ -130,11 +132,31 @@ void loop() {
     }
   }
 
+  if (currentMillis - doorMillis >= doorInterval) {
+    doorMillis = currentMillis;
+
+    int doorCurr = digitalRead(doorPin);
+    int topCurr = digitalRead(topPin);
+    if (doorCurr && !doorStatus) {
+      doorStatus = true;
+      notify("door");
+    } else if (!doorCurr && doorStatus) {
+      doorStatus = false;
+      notify("door/close");
+    }
+    if (topCurr && !topStatus) {
+      topStatus = true;
+      notify("top");
+    } else if (!topCurr && topStatus) {
+      topStatus = false;
+      notify("top/close");
+    }
+  }
+
   if (currentMillis - screenMillis >= screenInterval) {
     screenMillis = currentMillis;
 
     timeClient.update();
-
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
     display.drawString(64, 0, timeClient.getFormattedTime());
