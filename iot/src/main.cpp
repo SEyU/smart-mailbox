@@ -18,8 +18,8 @@ const int doorPin = D1;
 
 const int ledInterval = 100;
 const int screenInterval = 1000;
-const int dhtInterval = 10000;
-const int ldrThreshold = 50;
+const int dhtInterval = 60000;
+const int ldrThreshold = 100;
 
 int ledMillis = 0;
 int screenMillis = 0;
@@ -28,9 +28,11 @@ int dhtMillis = 0;
 float temperature = 0;
 float humidity = 0;
 int ldrLast = 0;
-int ldrCount = 0;
-int ldrValue = 0;
 int mailCount = 0;
+bool mailIn = false;
+
+bool topStatus = false;
+bool doorStatus = false;
 
 SSD1306 display(0x3c, D3, D4);
 WiFiUDP ntpUDP;
@@ -73,14 +75,15 @@ void notify(String path) {
     return;
   }
   client.setTimeout(2);
-  if(client.printf("POST /%s HTTP/1.1\r\nHost: mailbox.clanlr.net\r\n \
-                    X-Api-Key: test api key\r\n\r\n", path.c_str()) > 0){
+  if(client.printf("POST /%s HTTP/1.1\r\nHost: mailbox.clanlr.net\r\nX-Api-Key: %s\r\n\r\n",
+                   path.c_str(), apiKey) > 0){
     while(client.connected() && client.available() == 0){
       delay(1);
     }
-//    while(client.available()){
-//      Serial.write(client.read());
-//    }
+    while(client.available()){
+      Serial.write(client.read());
+    }
+    Serial.println("");
     if(client.connected()){
       client.stop();
     }
@@ -107,23 +110,18 @@ void loop() {
       if (ldrLast == 0) {
         delay(200);
         ldrLast = analogRead(ldrPin);
-        ldrCount = 0;
-        ldrValue = 0;
         Serial.printf("LDR initial value = %d\n", ldrLast);
       } else {
-        ldrValue += analogRead(ldrPin);
-        ldrCount += 1;
-        if (ldrCount == 5) {
-          int ldrDiff = (ldrValue/5) - ldrLast;
-          Serial.printf("DEBUG Diff = %d\n", ldrDiff);
-          if (abs(ldrDiff) > ldrThreshold) {
+        int ldrCurr = analogRead(ldrPin);
+        if (ldrCurr - ldrLast > ldrThreshold) {
+          if (!mailIn) {
+            Serial.printf("DEBUG ldrCurr = %d, ldrLast = %d, diff = %d\n", ldrCurr, ldrLast, ldrCurr - ldrLast);
             mailCount += 1;
-            Serial.printf("New mail! Diff = %d\n", ldrDiff);
+            mailIn = true;
             notify("letter");
-            ldrLast = analogRead(ldrPin);
           }
-          ldrCount = 0;
-          ldrValue = 0;
+        } else {
+          mailIn = false;
         }
       }
     } else {
