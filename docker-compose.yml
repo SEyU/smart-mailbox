@@ -19,6 +19,10 @@ services:
       - mongo:/data/db
     ports:
       - "27017:27017"
+  redis:
+    image: redis:3.0
+    ports:
+      - "6379:6379"
 volumes:
   mongo:
     driver: "local"
