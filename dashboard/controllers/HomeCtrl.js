@@ -2,18 +2,32 @@
 
     $('.dropdown-toggle').dropdown();
     
+    $(window).resize(function(){
+        graficaCorreos();
+        graficaTemperaturas();
+    });
     $scope.time = new Date().toLocaleTimeString();
     $scope.estado = 0;
+    $scope.puertas = "";
     var hoy = $interval(function(){
        $scope.time = new Date().toLocaleTimeString();
        MainService.getStatus().then(function (response) {
 
             $scope.estado = response.data.count;
+            if(response.data.top == "open" && response.data.front == "open"){
+                $scope.puertas ="img/topOdoorO.png";
+            }else if(response.data.top == "open" && response.data.front == "close"){
+                $scope.puertas ="img/topOdoorC.png";
+            }else if(response.data.top == "close" && response.data.front == "open"){
+                $scope.puertas ="img/topCdoorO.png";
+            }else if(response.data.top == "close" && response.data.front == "close"){
+                $scope.puertas ="img/topCdoorC.png";
+            }
 
 
         }, function (error) {
 
-            window.alert(error.message);
+            window.alert("fallo en estado");
         });
         MainService.getTempNow().then(function (response2) {
 
@@ -23,7 +37,7 @@
 
         }, function (error) {
 
-            window.alert(error.message);
+            window.alert("fallo en getTempNow()");
         });
         
     },1000);
@@ -166,9 +180,6 @@
         }
     };
 
-    var graficaRecogidas = function () {
-
-    };
 
     $scope.reload = function(){
         window.location.reload();
@@ -182,7 +193,7 @@
 
         }, function (error) {
 
-            window.alert(error.message);
+            window.alert("fallo en getStatus");
         });
         MainService.getCorreo().then(function (response) {
 
@@ -192,11 +203,10 @@
             MainService.getRecogidas().then(function (response) {
 
                 recogidas = response.data;
-                graficaRecogidas();
 
             }, function (error) {
 
-                window.alert(error.message);
+                window.alert("fallo en getRecogidas()");
 
             });
 
@@ -207,12 +217,12 @@
 
             }, function (error) {
 
-                window.alert(error.message)
+                window.alert("fallo en getTemp()");
             });
 
         }, function (error) {
 
-            window.alert(error.message);
+            window.alert("fallo en getCorreo()");
         });
     }
 }]);
