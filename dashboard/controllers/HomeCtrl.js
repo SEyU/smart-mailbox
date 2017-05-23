@@ -6,6 +6,11 @@
         graficaCorreos();
         graficaTemperaturas();
     });
+
+    $(document).ready(function(){
+        $('.sameh').matchHeight();
+    });
+
     $scope.time = new Date().toLocaleTimeString();
     $scope.estado = 0;
     $scope.puertas = "";
