@@ -1,2 +1,5 @@
 const char* ssid = "ssid";
 const char* password = "password";
+const char* apiKey = "test api key";
+const char* apiURL = "mailbox.clanlr.net";
+const int apiPort = 8080;

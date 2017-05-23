@@ -72,7 +72,7 @@ void setup() {
 void notify(String path) {
   unsigned long startMillis = millis();
   SyncClient client;
-  if(!client.connect("mailbox.clanlr.net", 8000)){
+  if(!client.connect(apiURL, apiPort)){
     Serial.println("Connection failed.");
     return;
   }
@@ -110,7 +110,7 @@ void loop() {
     } else if (digitalRead(topPin)) {
       digitalWrite(ledPin, HIGH);
       if (ldrLast == 0) {
-        delay(200);
+        delay(500);
         ldrLast = analogRead(ldrPin);
         Serial.printf("LDR initial value = %d\n", ldrLast);
       } else {
