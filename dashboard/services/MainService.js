@@ -1,6 +1,6 @@
 app.service('MainService', ['$http', function ($http) {
 
-var urlBase = 'http://localhost:8000';
+var urlBase = 'http://localhost:8080';
 
     this.getCorreo = function () {
 

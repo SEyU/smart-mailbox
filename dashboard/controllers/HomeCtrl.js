@@ -5,6 +5,7 @@
     $(window).resize(function(){
         graficaCorreos();
         graficaTemperaturas();
+        $('.sameh').matchHeight();
     });
 
     $(document).ready(function(){
