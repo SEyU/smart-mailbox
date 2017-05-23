@@ -5,11 +5,6 @@
     $(window).resize(function(){
         graficaCorreos();
         graficaTemperaturas();
-        $('.sameh').matchHeight();
-    });
-
-    $(document).ready(function(){
-        $('.sameh').matchHeight();
     });
 
     $scope.time = new Date().toLocaleTimeString();
