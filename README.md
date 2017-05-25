@@ -20,7 +20,14 @@ docker-compose stop && docker-compose up -d
 
 ## Dashboard
 
-For the dashboard we use **Angular.js** as a framework to develop it.
+For the dashboard we use **Angular.js** as a framework to develop it, as a requirements we don't need anything but a web server like apache or nginx. To change the address of the API within the dashboard you have to change a line in the services/MainService.js file.
+
+```
+app.service('MainService', ['$http', function ($http) {
+var urlBase = 'http://mailbox.clanlr.net:8080';
+
+...
+```
 
 We use a MVC schema to develop the app.
 
