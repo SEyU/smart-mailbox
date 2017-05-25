@@ -32,9 +32,11 @@ To draw charts we call the google charts library, with it we draw 2 different ki
 
 
 * Calendar charts:
+
 ![Screenshot](images/cchart.png)
 
 * Line charts:
+
 ![Screenshot](images/tchart.png)
 
 ### Dashboard - RealTime statistics
