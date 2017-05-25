@@ -24,7 +24,8 @@ For the dashboard we use **Angular.js** as a framework to develop it, as a requi
 
 ```
 app.service('MainService', ['$http', function ($http) {
-var urlBase = 'http://mailbox.clanlr.net:8080';
+
+var urlBase = 'http://apiaddress:8080';
 
 ...
 ```
