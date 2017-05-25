@@ -13,6 +13,21 @@ If there are changes
 docker-compose build
 docker-compose stop && docker-compose up -d
 ```
+
+## Interactive SmartMailbox system.
+ 
+Smart Mailbox with high functionality.
+ 
+* Look the number of letters inside your Smart Mailbox.
+* Get a history of correspondence received in your dashboard.
+* It displays real time status of your Smart Mailbox, controlling the state of the inlet opening and the door.
+* Get information about the temperature and humidity of the location of your Smart Mailbox.
+* Displays the current month history of maximum minimum temperatures and humidity of the environment your smart mailbox.
+ 
+All from a customizable web easily accessible.
+ 
+![Screenshot](http://i.picasion.com/pic85/caae5109f283e18741ba7fe1f142e1cb.gif)
+
 ## Schema
 
 ![Screenshot](images/Smart-mailbox2.png)
