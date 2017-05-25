@@ -32,13 +32,13 @@ To draw charts we call the google charts library, with it we draw 2 different ki
 
 
 * Calendar charts:
-* ![Screenshot](images/cchart.png)
+![Screenshot](images/cchart.png)
 
 * Line charts:
-* ![Screenshot](images/tchart.png)
+![Screenshot](images/tchart.png)
 
 ### Dashboard - RealTime statistics
 
 In our dashboard we can control the status of our mailbox (doors and letters) in real time, besides that we can see the temperature and humidity on the fly.
 
-* ![Screenshot](images/realtimes.png) 
+![Screenshot](images/realtimes.png) 
