@@ -98,3 +98,11 @@ To draw charts we call the google charts library, with it we draw 2 different ki
 In our dashboard we can control the status of our mailbox (doors and letters) in real time, besides that we can see the temperature and humidity on the fly.
 
 ![Screenshot](images/realtimes.png) 
+
+## API 
+
+All communications is done via HTTP REST services. We have an REST service made in Python and Flask. Persistence is achived using MongoDB for storing events and Redis for hadling the state of the doors.
+
+All infraestructure is based in Docker both in development and in production. Our production machine is a Ubuntu Server 16.04 hosted in Azure.
+
+![Screenshot](images/infra.png) 
