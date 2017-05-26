@@ -2,31 +2,14 @@
 
     $('.dropdown-toggle').dropdown();
     
+    $(window).resize(function(){
+        graficaCorreos();
+        graficaTemperaturas();
+    });
+
     $scope.time = new Date().toLocaleTimeString();
     $scope.estado = 0;
-    var hoy = $interval(function(){
-       $scope.time = new Date().toLocaleTimeString();
-       MainService.getStatus().then(function (response) {
-
-            $scope.estado = response.data.count;
-
-
-        }, function (error) {
-
-            
-        });
-        MainService.getTempNow().then(function (response2) {
-
-            $scope.tempNow = response2.data[0].temp;
-            $scope.humNow = response2.data[0].hum;
-
-
-        }, function (error) {
-
-            
-        });
-        
-    },1000);
+    $scope.puertas = "";
 
     var correos;
     var recogidas;
@@ -36,9 +19,106 @@
     var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio",
         "Augosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-    
+    $scope.reload = function(){
+        window.location.reload();
+    };
+
+    $scope.cargarResumen = function () {
+        
+        MainService.getStatus().then(function (response) {
+
+            if(response.data.count == '1'){
+                $scope.estado = response.data.count + ' correo';
+            }else{
+                $scope.estado = response.data.count + ' correos';
+            }
+            
+
+            if(response.data.top == "open" && response.data.front == "open"){
+                $scope.puertas ="img/topOdoorO.png";
+            }else if(response.data.top == "open" && response.data.front == "close"){
+                $scope.puertas ="img/topOdoorC.png";
+            }else if(response.data.top == "close" && response.data.front == "open"){
+                $scope.puertas ="img/topCdoorO.png";
+            }else if(response.data.top == "close" && response.data.front == "close"){
+                $scope.puertas ="img/topCdoorC.png";
+            }
+
+        }, function (error) {
+
+            window.alert("fallo en getStatus");
+
+        });
+
+        MainService.getCorreo().then(function (response) {
+
+            correos = response.data;
+            graficaCorreos();
+
+            MainService.getRecogidas().then(function (response) {
+
+                recogidas = response.data;
+
+            }, function (error) {
+
+                window.alert("fallo en getRecogidas()");
+
+            });
+
+            MainService.getTemp().then(function (response) {
+
+                temperaturas = response.data;
+                graficaTemperaturas();
+
+            }, function (error) {
+
+                window.alert("fallo en getTemp()");
+            });
+
+        }, function (error) {
+
+            window.alert("fallo en getCorreo()");
+        });
+    }
+
+    var hoy = $interval(function(){
+       $scope.time = new Date().toLocaleTimeString();
+       MainService.getStatus().then(function (response) {
+
+            if(response.data.count == '1'){
+                $scope.estado = response.data.count + ' correo';
+            }else{
+                $scope.estado = response.data.count + ' correos';
+            }
+            
+
+            if(response.data.top == "open" && response.data.front == "open"){
+                $scope.puertas ="img/topOdoorO.png";
+            }else if(response.data.top == "open" && response.data.front == "close"){
+                $scope.puertas ="img/topOdoorC.png";
+            }else if(response.data.top == "close" && response.data.front == "open"){
+                $scope.puertas ="img/topCdoorO.png";
+            }else if(response.data.top == "close" && response.data.front == "close"){
+                $scope.puertas ="img/topCdoorC.png";
+            }
 
 
+        }, function (error) {
+
+            window.alert("fallo en estado");
+        });
+        MainService.getTempNow().then(function (response2) {
+
+            $scope.tempNow = response2.data[0].temp;
+            $scope.humNow = response2.data[0].hum;
+
+
+        }, function (error) {
+
+            window.alert("fallo en getTempNow()");
+        });
+        
+    },1000);
     var graficaTemperaturas = function () {
 
       google.charts.setOnLoadCallback(drawChart);
@@ -165,65 +245,4 @@
             chart.draw(dataTable, options);
         }
     };
-
-    var graficaRecogidas = function () {
-
-    };
-
-    $scope.reload = function (){
-
-        window.location.reload();
-    };
-
-    $scope.cargarResumen = function () {
-        
-        MainService.getTempNow().then(function (response2) {
-
-            $scope.tempNow = response2.data[0].temp;
-            $scope.humNow = response2.data[0].hum;
-
-
-        }, function (error) {
-
-            
-        });
-        MainService.getStatus().then(function (response) {
-
-            $scope.estado = response.data.count;
-
-        }, function (error) {
-
-            
-        });
-        MainService.getCorreo().then(function (response) {
-
-            correos = response.data;
-            graficaCorreos();
-
-            MainService.getRecogidas().then(function (response) {
-
-                recogidas = response.data;
-                graficaRecogidas();
-
-            }, function (error) {
-
-                
-
-            });
-
-            MainService.getTemp().then(function (response) {
-
-                temperaturas = response.data;
-                graficaTemperaturas();
-
-            }, function (error) {
-
-                
-            });
-
-        }, function (error) {
-
-            
-        });
-    }
 }]);

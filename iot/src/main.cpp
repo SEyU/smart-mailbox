@@ -5,7 +5,8 @@
 #include <NTPClient.h>
 #include <SSD1306.h>
 #include <DHT.h>
-
+#include <ESPAsyncTCP.h>
+#include <SyncClient.h>
 #include "fonts.h"
 #include "config.h"
 
@@ -17,17 +18,23 @@ const int doorPin = D1;
 
 const int ledInterval = 100;
 const int screenInterval = 1000;
-const int dhtInterval = 10000;
-const int ldrThreshold = 50;
+const int dhtInterval = 60000;
+const int doorInterval = 1000;
+const int ldrThreshold = 100;
 
 int ledMillis = 0;
 int screenMillis = 0;
 int dhtMillis = 0;
+int doorMillis = 0;
 
 float temperature = 0;
 float humidity = 0;
 int ldrLast = 0;
 int mailCount = 0;
+bool mailIn = false;
+
+bool topStatus = false;
+bool doorStatus = false;
 
 SSD1306 display(0x3c, D3, D4);
 WiFiUDP ntpUDP;
@@ -62,6 +69,34 @@ void setup() {
   Serial.begin(9600);
 }
 
+void notify(String path) {
+  unsigned long startMillis = millis();
+  SyncClient client;
+  if(!client.connect(apiURL, apiPort)){
+    Serial.println("Connection failed.");
+    return;
+  }
+  client.setTimeout(2);
+  if(client.printf("POST /%s HTTP/1.1\r\nHost: mailbox.clanlr.net\r\nX-Api-Key: %s\r\n\r\n",
+                   path.c_str(), apiKey) > 0){
+    while(client.connected() && client.available() == 0){
+      delay(1);
+    }
+//    While(client.available()){
+//      Serial.write(client.read());
+//    }
+//    Serial.println("");
+    if(client.connected()){
+      client.stop();
+    }
+    Serial.printf("POST /%s OK. Time = %u ms.\n", path.c_str(), millis() - startMillis);
+  } else {
+    client.stop();
+    Serial.println("Send failed.");
+    while(client.connected()) delay(1);
+  }
+}
+
 void loop() {
   unsigned long currentMillis = millis();
 
@@ -74,20 +109,21 @@ void loop() {
       mailCount = 0;
     } else if (digitalRead(topPin)) {
       digitalWrite(ledPin, HIGH);
-      delay(200);
-      int ldrValue = analogRead(ldrPin);
       if (ldrLast == 0) {
-        ldrLast = ldrValue;
-        Serial.print("Initial value = ");
-        Serial.println(abs(ldrLast));
+        delay(500);
+        ldrLast = analogRead(ldrPin);
+        Serial.printf("LDR initial value = %d\n", ldrLast);
       } else {
-        int ldrDiff = ldrLast - ldrValue;
-        if (abs(ldrDiff) > ldrThreshold) {
-          mailCount += 1;
-          delay(500);
-          Serial.print("New mail! Diff = ");
-          Serial.println(abs(ldrDiff));
-          ldrLast = analogRead(ldrPin);
+        int ldrCurr = analogRead(ldrPin);
+        if (ldrCurr - ldrLast > ldrThreshold) {
+          if (!mailIn) {
+            Serial.printf("DEBUG ldrCurr = %d, ldrLast = %d, diff = %d\n", ldrCurr, ldrLast, ldrCurr - ldrLast);
+            mailCount += 1;
+            mailIn = true;
+            notify("letter");
+          }
+        } else {
+          mailIn = false;
         }
       }
     } else {
@@ -96,11 +132,31 @@ void loop() {
     }
   }
 
+  if (currentMillis - doorMillis >= doorInterval) {
+    doorMillis = currentMillis;
+
+    int doorCurr = digitalRead(doorPin);
+    int topCurr = digitalRead(topPin);
+    if (doorCurr && !doorStatus) {
+      doorStatus = true;
+      notify("door");
+    } else if (!doorCurr && doorStatus) {
+      doorStatus = false;
+      notify("door/close");
+    }
+    if (topCurr && !topStatus) {
+      topStatus = true;
+      notify("top");
+    } else if (!topCurr && topStatus) {
+      topStatus = false;
+      notify("top/close");
+    }
+  }
+
   if (currentMillis - screenMillis >= screenInterval) {
     screenMillis = currentMillis;
 
     timeClient.update();
-
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
     display.drawString(64, 0, timeClient.getFormattedTime());
@@ -120,5 +176,7 @@ void loop() {
       humidity = h;
       temperature = t;
     }
+    String path;
+    notify(String("measures?temp="+ String(temperature, 1) + "&hum=" + String(humidity, 1)));
   }
 }

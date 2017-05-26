@@ -5,5 +5,5 @@ WORKDIR /var/www/app
 RUN pip install uwsgi
 RUN pip install -r requirements.txt
 
-CMD ["uwsgi", "--http", ":8000", "--wsgi-file", "/var/www/app/server.py", "--callable", "app", "--py-autoreload", "1"]
-EXPOSE 8000
+CMD ["uwsgi", "--http", ":8080", "--wsgi-file", "/var/www/app/server.py", "--callable", "app", "--py-autoreload", "1"]
+EXPOSE 8080
